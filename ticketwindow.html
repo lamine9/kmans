@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title></title>
+</head>
+<body>    
+    <div style="margin: 5px; height: 100%;">
+            <div style="text-align: center;">    
+                    <b>MAS SERVICE</b>
+                    <p>Keur Moussa près de la Mairie <br> Monument Villa N 145 <br> Tel: 77 750 74 89 <br>--------</p>
+                </div>
+                <div>
+                    <p id='sale_at'></p>
+                    <p id='sale_id'></p>
+                </div>
+                
+                <div style="text-align: left; margin-top: 10px" >
+                    <table style="width: 100%">
+                        <thead>
+                            <tr>
+                                <th>Qté</th>
+                                <th>Désignation</th>
+                                <th style="text-align:right">Px Unit</th>
+                                <th style="text-align:right">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketbody">
+                           
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="text-align:right"> <b> NET A PAYER F CFA: </b></td>
+                                <td id='total' style="text-align:right"></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                
+                <div style="text-align: center">
+                    <p>Merci de votre visite !</p>
+                </div>  
+                <div style="text-align: center; margin-top: 10px">
+                    <button onclick="window.print()">imprimer</button>
+                </div>   
+    </div> 
+    
+    <script>
+        require('./public/app/js/ticketwindow.js')       
+    </script>
+        
+</body>
+</html>

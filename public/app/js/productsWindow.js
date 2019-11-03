@@ -10,19 +10,24 @@ $(document).ready(()=>{
         }else{
           stock_state_element = "";
         }
-        /*
+      
         $('tbody').append("<tr class='"+stock_state_element+"'>"+
-        "<td>"+result[i].prod_stock+"</td>"+
+        "<td>#"+result[i].prod_id+"</td>"+
         "<td>"+result[i].prod_name+"</td>"+
-        "<td>"+result[i].prod_pa+"</td>"+
-        "<td>"+result[i].prod_pv+"</td>"+
+        "<td class='text-right'>"+result[i].prod_stock+"</td>"+
+        "<td class='text-right'>"+result[i].prod_pa+"</td>"+
+        "<td class='text-right'>"+result[i].prod_pv+"</td>"+
         "<td></td>"+
         "</tr>")
-        */
-       $('.ul').append("<a href='#' id='"+result[i].prod_id+"' class='list-group-item list-group-item-action py-0 liproduct'>"+
-        result[i].prod_name.toString()+"<span class='"+stock_state_element+"'> ("+result[i].prod_stock+")</span></a>");
+        
+      // $('.ul').append("<a href='#' id='"+result[i].prod_id+"' class='list-group-item list-group-item-action py-0 liproduct'>"+
+        //result[i].prod_name.toString()+"<span class='"+stock_state_element+"'> ("+result[i].prod_stock+")</span></a>");
       }
       result = null;
     });
+
+    $('#addProdBtn').on('click', ()=>{
+      ipcRenderer.send('product:addProd')
+    })
 
 })

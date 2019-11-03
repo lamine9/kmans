@@ -1,10 +1,14 @@
 // Modules to control application life and create native browser window
-const {
-  app, 
-  BrowserWindow, 
+const { 
+  BrowserWindow,
+  BrowserView,
+  dialog,
   Menu, 
   ipcMain
 } = require('electron');
+
+const app = require('electron').app
+const path = require('path')
 
 const fs = require('fs');
 
@@ -12,14 +16,14 @@ const fs = require('fs');
 var knex = require('knex')({
   client: 'sqlite3',
   connection: {
-    filename: "./kmans_db.sqlite3"
+    filename: path.join(app.getPath('documents'), 'kmans_db.sqlite3')
   },
   useNullAsDefault: true
 });
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow
+var mainWindow
 
 function createWindow () {
   // Create the browser window.
@@ -109,32 +113,38 @@ function createAddWindow(){
   });
 }
 
-//========================= productsWindow ======================================
-
-function createProductsWindow(){
-  productsWindow = new BrowserWindow({
+//========================= ticketwindow ======================================
+//Create a addwindow
+function createTicketWindow(){
+  ticketwindow = new BrowserWindow({
+      title: 'Reçu de vente',
       parent: mainWindow,
-      modal: true,
-      title: 'Gestion des produits',
+      minimizable: true,
       resizable: false,
-      minimizable: false,
+      modal: false,
+      width: 400,
+      height: 500,
       webPreferences: {
         nodeIntegration: true
       },
   });
-
-  productsWindow.maximize();
-
+  
   //Load html file into a window
-  productsWindow.loadFile('productsWindow.html');
+  ticketwindow.loadFile('ticketwindow.html');
 
-  productsWindow.setMenu(null);
+  ticketwindow.setMenu(null);
 
   //Garbage collection handle
-  productsWindow.on('close', function(){
-    productsWindow = null;
+  ticketwindow.on('close', function(){
+      addWindow = null;
   });
 }
+
+//impression de ticket
+ipcMain.on('ticketwindow:print', (e, item)=>{
+  let contents = ticketwindow.webContents
+  contents.print()
+})
 
 //bind products
 function listAllProducts(windowName){
@@ -148,16 +158,27 @@ ipcMain.on('mainWindowLoaded', function(){
   listAllProducts(mainWindow)
 })
 
+ipcMain.on('product:addProd', ()=>{
+  createAddWindow()
+})
+
+/*
 ipcMain.on('productsWindowLoaded', function(){
   listAllProducts(productsWindow)
   
 })
+*/
 
 //select product by id
 ipcMain.on('product:bindById', function(e, args){
   let product = knex('products').where('prod_id', args).select('prod_id', 'prod_name', 'prod_pa', 'prod_pv', 'prod_stock');
   product.then(function(rows){
-    mainWindow.webContents.send('product:bindById', rows);
+    if(rows[0].prod_stock > 0){
+      mainWindow.webContents.send('product:bindById', rows);
+    }else{
+      dialog.showMessageBox(mainWindow, {type: 'warning', title: 'Rupture de stock !', message: 'Veuillez augmenter le stock de ce produit'})
+    }
+    
   })
 })
 
@@ -165,41 +186,70 @@ ipcMain.on('product:bindById', function(e, args){
 ipcMain.on('product:add', function(e, item){
   let req = knex('products').insert({prod_name: item[0], prod_pa: item[1], prod_pv: item[2], prod_stock: item[3]}).returning('prod_id');
   req.then(function(status){
-    mainWindow.webContents.send('product:add', status);
     addWindow.close();
+    mainWindow.loadFile('./views/productsWindow.html');
   })
 })
 
 //executer une vente
 ipcMain.on('sale:add', function(e, items){
-  /*let req_new_sale = knex('sales').insert({sale_at: Date.now(), sale_user_id: 0}).returning('sale_id');
-  req_new_sale.then(function(status){*/
-    let content = "";
+  
+if(items.length === 0){
+  dialog.showMessageBox(mainWindow, {
+    parent: mainWindow,
+    type: 'warning',
+    title: 'Panier de produits vide ?',
+    message: 'Veuillez ajouter des produits au panier',
+  })
+}
+else{
+
+  dialog.showMessageBox(mainWindow, {
+    type: 'question',
+    message: 'Confirmer? : oui / non ?',
+    detail: 'Si vous cliquez sur "Non" aucune action ne sera faite !',
+    buttons: ['Oui', 'Non'],
+    noLink: true
+  }, (response)=>{
+
+    if(response === 0){
+      var last_sale_id = 0;
+      let req_new_sale = knex('sales').insert({sale_at: Date.now(), sale_user_id: 0}).returning('sale_id');
+      req_new_sale.then(function(status){
+    
     for(let i=0; i<items.length; i++){
-     /* items[i]['sd_sale_id'] = status[0]
+      items[i]['sd_sale_id'] = status[0]
       knex('products').where('prod_id', '=', items[i]['sd_prod_id']).decrement({prod_stock: items[i]['sd_quantity']}).
       then((status)=>{
-        console.log(status)
-      })*/
+        //console.log(status)
+      })
 
-      content += items[i]['sd_quantity']+"x épingles à mèches\t"+items[i]['sd_price']+"\t"+items[i]['sd_quantity']*items[i]['sd_price']+"\n";
-
+      last_sale_id = status[0]
     }
-
-   /* fs.writeFile('ticket.txt', content, (err) => {  
-      // throws an error, you could also catch it here
-      if (err) throw err;
-  
-      // success case, the file was saved
-      console.log('Lyric saved!');
-  });
-
+    
     let req_save_basket = knex('sale_details').insert(items);
     req_save_basket.then(function(status){
       mainWindow.loadFile('index.html');
+      createTicketWindow()
     })
-  })*/
 
+    ipcMain.on('ticketwindowLoaded', (e, items)=>{
+
+      knex.select('*').from('products')
+      .join('sale_details', {'products.prod_id': 'sale_details.sd_prod_id'})
+      .join('sales', {'sales.sale_id': 'sale_details.sd_sale_id'})
+      .where('sales.sale_id', '=', last_sale_id)
+      .then((res)=>{
+        console.log(res)
+        ticketwindow.webContents.send('ticket:bind', res)
+      })
+    })
+
+    
+  })
+    }  
+  })
+}
 })
 
 //fermeture de addwindow
@@ -214,13 +264,13 @@ const mainMenuTemplate = [
     label: 'Options',
     submenu:[
         {
-            label: 'Ajouter nouveau produit',
+            label: 'Nouveau produit',
             click(){
                 createAddWindow()
             }
         },
         {
-            label: 'Afficher mon journal',
+            label: 'Journal',
             click(){
               mainWindow.webContents.send('item:clearAll')
             }
@@ -261,17 +311,31 @@ if(process.env.NODE_ENV !== 'production'){
         {
           label: 'Gestion des produits',
           click(){
-            createProductsWindow()
+            //createProductsWindow()
+            mainWindow.loadFile('./views/productsWindow.html');
           }
         },
         {
-          label: 'Gestion des ventes'
+          label: 'Gestion des ventes',
+          click(){
+            //createProductsWindow()
+            mainWindow.loadFile('./views/ventesWindow.html');
+          }
+          
         },
         {
-          label: 'Gestion des charges'
+          label: 'Gestion des charges',
+          click(){
+            //createProductsWindow()
+            mainWindow.loadFile('./views/chargesWindow.html');
+          }
         },
         {
-          label: 'Gestion des utilisateurs'
+          label: 'Gestion des utilisateurs',
+          click(){
+            //createProductsWindow()
+            mainWindow.loadFile('./views/usersWindow.html');
+          }
         },
       ]
     }

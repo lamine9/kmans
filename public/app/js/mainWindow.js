@@ -1,7 +1,7 @@
 $(document).ready(function(){
 
     const {
-      electron,
+      BrowserWindow,
       ipcRenderer
     } = require('electron');
     const notifier = require('electron-notifications');
@@ -23,49 +23,52 @@ $(document).ready(function(){
     ipcRenderer.on('products:bind', function(evt, result){
       let stock_state_element = "";
       for(var i=0; i<result.length; i++){
-        if(result[i].prod_stock == 0){
-          stock_state_element = "text-danger";
+        if(result[i].prod_stock === 0){
+          stock_state_element = "red";
+        }else if(result[i].prod_stock >= 5){
+          stock_state_element = "green";
         }else{
-          stock_state_element = "";
+          stock_state_element = "orange";
         }
+
+        $('.ul').append("<a href='#' id='"+result[i].prod_id+"' class='nav-group-item liproduct'>"
+              +"<span class='icon icon-record' style='color:"+stock_state_element+"'></span>"
+        +" ("+result[i].prod_stock+") "+result[i].prod_name.toString()+"</a>");
+        
+        /*
         $('.ul').append("<a href='#' id='"+result[i].prod_id+"' class='list-group-item list-group-item-action py-0 liproduct'>"+
         result[i].prod_name.toString()+"<span class='"+stock_state_element+"'> ("+result[i].prod_stock+")</span></a>");
+        */
       }
-      result = null;
+      //result = null;
     });
+
+
     
     //ajout d'un produit au panier
     
     ipcRenderer.on('product:bindById', function(evt, prod){
-      if(prod[0].prod_stock === 0){
-        dialog.showMessageBox(null, {
-          type: 'info',
-          modal: true,
-          message: 'Stock épuisé !',
-          detail: 'Veuillez augmenter le stock de ce produit ('+prod[0].prod_name+')',
-        })
-      }else{
+      
         $('tbody').append("<tr scope='row' class='basketrows'>"+
         "<th class='first_td'> <input value='1' style='text-align:right; height:20px; width:70px' type='number' class='quantity' min='1' max='"+prod[0].prod_stock+"'>"+
         "<input value='"+prod[0].prod_id+"' type='hidden' class='prod_id' /></th>"+
         "<td>"+prod[0].prod_name+"</td>"+
         "<td align='right' class='pu'>"+prod[0].prod_pv.toLocaleString('fr-FR')+"</td>"+
         "<td class='Ptotal' align='right'>"+prod[0].prod_pv.toLocaleString('fr-FR')+"</td>"+
-        "<td> <button type='button' class='close text-danger' aria-label='Close'>"+
-        "<span aria-hidden='true'>&times;</span> </button></td>"+
+        "<td><span title='supprimer' class='close icon icon-cancel-circled ' style='color:red'></span></td>"+
         "</tr>");
         $totaux = 0;
         $('.Ptotal').each(function(i){
           $totaux = $totaux + Number($('.Ptotal').eq(i).text().replace(/\s/g,''));
           $('#totaux').val($totaux.toLocaleString('fr-FR'));
         });
-      }
+    
              
     });
 
     $(document).on('click', 'a.liproduct', function(e){
         ipcRenderer.send('product:bindById', $(this).attr('id'))
-        console.log($(this).attr('id'))
+        //console.log($(this).attr('id'))
     })
 
     //automatisation des calculs
@@ -85,7 +88,7 @@ $(document).ready(function(){
     $(document).on('click', '.close', function(e){
       $totaux = $totaux - Number($(this).closest('tr').children('.Ptotal').text().replace(/\s/g,''));
       $('#totaux').val($totaux.toLocaleString('fr-FR'));
-      e.target.parentNode.parentNode.parentNode.remove();
+      e.target.parentNode.parentNode.remove();
     })
 
     //Rechercher un produit
@@ -103,8 +106,10 @@ $(document).ready(function(){
         'sd_price' : Number($(this).children('.pu').text().replace(/\s/g,''))
       };
       })
-      if(!basketshop.length){
+      ipcRenderer.send('sale:add', basketshop);
+      /*if(!basketshop.length){
         dialog.showMessageBox(null, {
+          parent: mainWindow,
           type: 'info',
           modal: true,
           message: 'Panier de produits vide ?',
@@ -112,9 +117,10 @@ $(document).ready(function(){
         })
       }else{
         dialog.showMessageBox(null, {
+          parent: mainWindow,
           type: 'question',
           modal: true,
-          message: 'Etes vous sur(s) de vouloirs executer cette vente ?',
+          message: 'Valider',
           detail: 'Si vous cliquez sur "Non" aucune action ne sera faite !',
           icon: './public/img/win/calendar.png',
           buttons: ['Oui', 'Non'],
@@ -125,7 +131,7 @@ $(document).ready(function(){
             ipcRenderer.send('sale:add', basketshop);
           }  
         })
-      }
+      }*/
       
     })
 
