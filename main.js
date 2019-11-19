@@ -16,7 +16,7 @@ const fs = require('fs');
 var knex = require('knex')({
   client: 'sqlite3',
   connection: {
-    filename: path.join(app.getPath('documents'), 'kmans_db.sqlite3')
+    filename: path.join('./kmans_db.sqlite3')
   },
   useNullAsDefault: true
 });
