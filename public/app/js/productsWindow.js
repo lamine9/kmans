@@ -1,33 +1,61 @@
 $(document).ready(()=>{
-    const {ipcRenderer} = require('electron');
-    //bind products from db
-    ipcRenderer.send('productsWindowLoaded');
-    ipcRenderer.on('products:bind', function(evt, result){
-      let stock_state_element = "";
-      for(var i=0; i<result.length; i++){
-        if(result[i].prod_stock == 0){
-          stock_state_element = "text-danger";
-        }else{
-          stock_state_element = "";
-        }
-      
-        $('tbody').append("<tr class='"+stock_state_element+"'>"+
-        "<td>#"+result[i].prod_id+"</td>"+
-        "<td>"+result[i].prod_name+"</td>"+
-        "<td class='text-right'>"+result[i].prod_stock+"</td>"+
-        "<td class='text-right'>"+result[i].prod_pa+"</td>"+
-        "<td class='text-right'>"+result[i].prod_pv+"</td>"+
-        "<td></td>"+
-        "</tr>")
-        
-      // $('.ul').append("<a href='#' id='"+result[i].prod_id+"' class='list-group-item list-group-item-action py-0 liproduct'>"+
-        //result[i].prod_name.toString()+"<span class='"+stock_state_element+"'> ("+result[i].prod_stock+")</span></a>");
-      }
-      result = null;
-    });
 
-    $('#addProdBtn').on('click', ()=>{
-      ipcRenderer.send('product:addProd')
-    })
+  const {ipcRenderer} = require('electron');
 
+  //bind products from db
+  ipcRenderer.send('mainWindowLoaded')
+  ipcRenderer.on('products:bind', function(evt, result){
+
+    for(let i=0; i<result.length; i++){
+      $('#table_body').append(
+      "<tr class='listprod'>"
+          +"<td class='idP'>"+result[i].prod_id+"</td>"
+          +"<td>"+result[i].prod_name+"</td>"
+          +"<td>"+result[i].prod_pa+"</td>"
+          +"<td>"+result[i].prod_pv+"</td>"
+          +"<td>"+result[i].prod_stock+"</td>"
+          +"<td>"
+            +"<span  data_id='"+result[i].prod_id+"' title='modifier' class='close icon icon-pencil editProdBtn' style='color:#5bc0de'></span> &nbsp;&nbsp;&nbsp;"
+            +"<span title='supprimer' class='deleteProdBtn close icon icon-cancel-circled ' style='color:red'></span>"
+          +"</td>"
+      +"</tr>"
+      )
+    }
+
+  });
+
+  //search products
+  $(document).on('input', '#prod_search', (e)=>{
+    $('.listprod').hide();
+    $('.listprod:contains('+$(e.target).val()+')').show();
+  })
+
+  //add new product
+  $('#addProdBtn').on('click', ()=>{
+   ipcRenderer.send('product:addProd')
+  })
+  
+  ipcRenderer.on('product:add', function(e, result){
+    $('.ul').children().remove();
+    ipcRenderer.send('mainWindowLoaded')
+  })
+
+  //edit product
+  $(document).on('click', '.editProdBtn', (e)=>{
+    let prodId = e.target.parentNode.parentNode.childNodes[0].textContent
+    ipcRenderer.send('product:editProd', prodId)
+  })
+
+  //delete product
+  $(document).on('click', '.deleteProdBtn', (e)=>{
+    let prodId = e.target.parentNode.parentNode.childNodes[0].textContent
+    ipcRenderer.send('product:deleteProd', prodId)
+  })
+ 
 })
+
+
+
+
+
+

@@ -59,16 +59,10 @@
                   <span class="icon icon-home icon-text"></span>
                   Filters
                 </button>
-
-                <div class="dropdown pull-right">
-                  <button class="btn btn-default btn-dropdown">
-                    <span class="icon icon-megaphone"></span>
-                  </button>
-                  <div class="dropdown-content">
-                    <a>Hello World!</a>
-                  </div>
-                </div>
-  
+                
+                <input  type="text" class="form-control form-control-sm pull-right" id="prod_search" 
+                style="width: 200px; height: 15px; margin-right: 10px;" placeholder="Rechercher un produit">
+               
             </div>
         </header>
 
@@ -114,42 +108,9 @@
     </div>
 
      <!-- Electron Javascript -->
-     <script src="../public/photon/template-app/app.js" charset="utf-8"></script>
      <script>
-       const {ipcRenderer} = require('electron');
-        window.$ = require('jquery');
-      //bind products from db
-      ipcRenderer.send('mainWindowLoaded')
-      ipcRenderer.on('products:bind', function(evt, result){
-     
-        for(let i=0; i<result.length; i++){
-          $('#table_body').append(
-          "<tr>"
-              +"<td>"+result[i].prod_id+"</td>"
-              +"<td>"+result[i].prod_name+"</td>"
-              +"<td>"+result[i].prod_pa+"</td>"
-              +"<td>"+result[i].prod_pv+"</td>"
-              +"<td>"+result[i].prod_stock+"</td>"
-              +"<td>"
-                +"<span title='modifier' class='close icon icon-pencil ' style='color:#5bc0de'></span> &nbsp;&nbsp;&nbsp;"
-                +"<span title='supprimer' class='close icon icon-cancel-circled ' style='color:red'></span>"
-              +"</td>"
-          +"</tr>"
-          )
-        }
-        
-      });
-
-      //add new product
-
-      $('#addProdBtn').on('click', ()=>{
-        ipcRenderer.send('product:addProd')
-      })
-      
-      ipcRenderer.on('product:add', function(e, result){
-        $('.ul').children().remove();
-        ipcRenderer.send('mainWindowLoaded')
-      })
+       window.$ = require('jquery');
+       require('../public/app/js/productsWindow.js');
      </script>
   </body>
 </html>

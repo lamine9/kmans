@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Ajouter nouveau produit</title>
-    <link rel="stylesheet" href="./public/photon/css/photon.min.css">
+    <title>Modifier le produit</title>
+    <link rel="stylesheet" href="../public/photon/css/photon.min.css">
 </head>
 <body>
 
@@ -10,6 +10,7 @@
         <div class="row" style="margin: 25px">
             <div class="col-12">
                 <form>
+                    <input type="hidden" id="prod_id">
                     <div class="form-group">
                         <label for="prod_name">Désignation du produit</label>
                         <input type="text" class="form-control form-control-sm" id="prod_name" aria-describedby="prod_nameHelp" placeholder="Entrer le nom du produit" required>
@@ -29,8 +30,8 @@
                     
                     <div class="row">
                         <div class="col-6 text-center">
-                            <button class="btn btn-negative btn-sm pull-left" id="closeAddWindowBtn" type="button">annuler</button>
-                            <button class="btn btn-positive btn-sm pull-right" type="submit">valider</button>
+                            <button class="btn btn-negative btn-sm pull-left" id="closeEditWindowBtn" type="button">annuler</button>
+                            <button class="btn btn-positive btn-sm pull-right" type="submit">enregistrer</button>
                         </div>
                     </div>
                     
@@ -38,10 +39,10 @@
             </div>
         </div>
     </div>
+    <!-- Electron Javascript -->
     <script>
         window.$ = require('jquery');
-        require('./public/app/js/addWindow.js')
-        
-    </script>
+        require('../public/app/js/editWindow.js');
+      </script>
 </body>
 </html>

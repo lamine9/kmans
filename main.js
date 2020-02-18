@@ -103,7 +103,7 @@ function createAddWindow(){
   });
   
   //Load html file into a window
-  addWindow.loadFile('addwindow.html');
+  addWindow.loadFile('views/addwindow.html');
 
   addWindow.setMenu(null);
 
@@ -113,8 +113,36 @@ function createAddWindow(){
   });
 }
 
+//========================= editwindow ======================================
+//Create a editwindow
+var editWindow
+function createEditWindow(){
+  editWindow = new BrowserWindow({
+      parent: mainWindow,
+      modal: true,
+      width: 350,
+      height: 430,
+      title: 'Modifier le produit',
+      resizable: false,
+      minimizable: false,
+      webPreferences: {
+        nodeIntegration: true
+      },
+  });
+  
+  editWindow.loadFile('views/editwindow.html')
+
+  editWindow.setMenu(null);
+
+  //Garbage collection handle
+  editWindow.on('close', function(){
+      editWindow = null;
+  });
+}
+
+
 //========================= ticketwindow ======================================
-//Create a addwindow
+//Create a TicketWindow
 function createTicketWindow(){
   ticketwindow = new BrowserWindow({
       title: 'Reçu de vente',
@@ -130,7 +158,7 @@ function createTicketWindow(){
   });
   
   //Load html file into a window
-  ticketwindow.loadFile('ticketwindow.html');
+  ticketwindow.loadFile('views/ticketwindow.html');
 
   ticketwindow.setMenu(null);
 
@@ -162,6 +190,49 @@ ipcMain.on('product:addProd', ()=>{
   createAddWindow()
 })
 
+ipcMain.on('product:editProd', (e, args)=>{
+  createEditWindow()
+  ipcMain.on('product:openEditProd',(e, item)=>{
+    knex('products').where('prod_id', args).select('prod_id', 'prod_name', 'prod_pa', 'prod_pv', 'prod_stock')
+    .then(function(rows){
+      editWindow.webContents.send('product:bindEditById', rows)
+    })
+  })
+})
+
+//product:edit
+ipcMain.on('product:edit', function(e, item){
+  let req = knex('products')
+  .where({prod_id: item[0]})
+  .update({prod_name: item[1], prod_pa: item[2], prod_pv: item[3], prod_stock: item[4]})
+  req.then(function(status){
+    editWindow.close();
+    mainWindow.loadFile('./views/productsWindow.html');
+  })
+})
+
+
+//product:delete
+ipcMain.on('product:deleteProd', (e, arg)=>{
+  dialog.showMessageBox(mainWindow, {
+    type: 'question',
+    message: 'Etes - vous sur(e)s de vouloir supprimer ce produit? : oui / non ?',
+    detail: 'Si vous cliquez sur "Non" aucune action ne sera faite !',
+    buttons: ['Oui', 'Non'],
+    noLink: true
+  }, (response)=>{
+    if(response === 0){
+      knex('products')
+      .where('prod_id', arg)
+      .del()
+      .then((status)=>{
+        mainWindow.loadFile('./views/productsWindow.html');
+      })
+    }
+  })
+})
+
+
 /*
 ipcMain.on('productsWindowLoaded', function(){
   listAllProducts(productsWindow)
@@ -182,7 +253,7 @@ ipcMain.on('product:bindById', function(e, args){
   })
 })
 
-//Catch product:add
+//product:add
 ipcMain.on('product:add', function(e, item){
   let req = knex('products').insert({prod_name: item[0], prod_pa: item[1], prod_pv: item[2], prod_stock: item[3]}).returning('prod_id');
   req.then(function(status){
@@ -190,6 +261,8 @@ ipcMain.on('product:add', function(e, item){
     mainWindow.loadFile('./views/productsWindow.html');
   })
 })
+
+
 
 //executer une vente
 ipcMain.on('sale:add', function(e, items){
@@ -240,7 +313,6 @@ else{
       .join('sales', {'sales.sale_id': 'sale_details.sd_sale_id'})
       .where('sales.sale_id', '=', last_sale_id)
       .then((res)=>{
-        console.log(res)
         ticketwindow.webContents.send('ticket:bind', res)
       })
     })
@@ -252,14 +324,34 @@ else{
 }
 })
 
-//fermeture de addwindow
+//close addwindow
 ipcMain.on('addWindow:close', (e, item)=>{
   addWindow.close()
+})
+
+//close editwindow
+ipcMain.on('editWindow:close', (e, item)=>{
+  editWindow.close()
 })
 
 //Create menu template
 const mainMenuTemplate = [
   {label:''},
+  {
+    label: 'Developer tools',
+    submenu:[
+        {
+            label: 'Toggle DevTools',
+            accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
+            click(item, focusedWindow){
+                focusedWindow.toggleDevTools();
+            }
+        },
+        {
+            role: 'reload'
+        }
+    ]
+  },
   {
     label: 'Options',
     submenu:[
@@ -288,21 +380,19 @@ const mainMenuTemplate = [
 
 //add admin menu if logged in
 if(process.env.NODE_ENV !== 'production'){
-  mainMenuTemplate.push({
-      label: 'Developer tools',
+  mainMenuTemplate.push(
+
+    //caissier menu
+    {
+      label: 'Caisses',
       submenu:[
           {
-              label: 'Toggle DevTools',
-              accelerator: process.platform == 'darwin' ? 'Command+I' : 'Ctrl+I',
-              click(item, focusedWindow){
-                  focusedWindow.toggleDevTools();
+              label: 'Caisse #1',
+              click(){
+                mainWindow.loadFile('index.html');
               }
-          },
-          {
-              role: 'reload'
-          }
-      ]
-    },
+          }]
+        },
 
     //admin menu
     {

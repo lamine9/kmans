@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Gestion des produits</title>
+    <title>Gestion des ventes</title>
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../public/photon/css/photon.min.css">
@@ -40,6 +40,17 @@
                 <button class="btn btn-default btn-dropdown pull-right">
                   <span class="icon icon-megaphone"></span>
                 </button>
+
+                <div class="pull-center" style="margin-left: auto;">
+                  <label for="dateFrom">Du:</label>
+                  <input  type="date" class="form-control form-control-sm " id="dateFrom" 
+                  style="width: 150px; height: 15px; margin-right: 10px;">
+                  <label for="dateFrom">Au:</label>
+                  <input  type="date" class="form-control form-control-sm " id="dateFrom" 
+                  style="width: 150px; height: 15px; margin-right: 10px;">
+                  <button class="btn btn-default btn-sm" type="">Chercher</button>
+                </div>              
+
             </div>
         </header>
 
@@ -74,11 +85,12 @@
                             <span class="icon icon-cloud"></span>
                             Desktop
                           </span>
+
                         </nav>
                   </div>
 
                   <div class="pane">
-                    ...
+                    
                   </div>
 
                 </div>

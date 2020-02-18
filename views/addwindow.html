@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Ajouter nouveau produit</title>
+    <link rel="stylesheet" href="../public/photon/css/photon.min.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="row" style="margin: 25px">
+            <div class="col-12">
+                <form>
+                    <div class="form-group">
+                        <label for="prod_name">Désignation du produit</label>
+                        <input type="text" class="form-control form-control-sm" id="prod_name" aria-describedby="prod_nameHelp" placeholder="Entrer le nom du produit" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prod_pa">Prix d'achat</label>
+                        <input type="number" value="0" class="form-control form-control-sm" id="prod_pa" aria-describedby="prod_paHelp" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prod_pv">Prix de vente</label>
+                        <input type="number" value="0" class="form-control form-control-sm" id="prod_pv" aria-describedby="prod_pvHelp" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prod_stock">Quantité du stock</label>
+                        <input type="number" value="0" class="form-control form-control-sm" id="prod_stock" aria-describedby="prod_stockHelp" min="0" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-6 text-center">
+                            <button class="btn btn-negative btn-sm pull-left" id="closeAddWindowBtn" type="button">annuler</button>
+                            <button class="btn btn-positive btn-sm pull-right" type="submit">valider</button>
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        window.$ = require('jquery');
+        require('../public/app/js/addWindow.js')
+        
+    </script>
+</body>
+</html>
