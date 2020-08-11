@@ -1,108 +1,117 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Gestion des ventes</title>
+    <title>Gestion des produits</title>
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="../public/photon/css/photon.min.css">
+    <link rel="stylesheet" href="../public/photon/css/photon.min.css" />
+    <style>
+      span,
+      a:hover {
+        cursor: pointer;
+      }
+
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        padding: 12px 16px;
+        z-index: 1;
+      }
+
+      .dropdown:hover .dropdown-content {
+        display: block;
+      }
+    </style>
   </head>
 
   <body>
     <!-- Wrap your entire app inside .window -->
     <div class="window">
-        <header class="toolbar toolbar-header">
-            <h1 class="title">Gestion des ventes</h1>
+      <header class="toolbar toolbar-header">
+        <h1 class="title"><strong>Gestion des produits</strong></h1>
 
-            <div class="toolbar-actions">
-                <div class="btn-group">
-                  <button class="btn btn-default">
-                    <span class="icon icon-home"></span>
-                  </button>
-                  <button class="btn btn-default">
-                    <span class="icon icon-folder"></span>
-                  </button>
-                  <button class="btn btn-default active">
-                    <span class="icon icon-cloud"></span>
-                  </button>
-                  <button class="btn btn-default">
-                    <span class="icon icon-popup"></span>
-                  </button>
-                  <button class="btn btn-default">
-                    <span class="icon icon-shuffle"></span>
-                  </button>
-                </div>
-            
-                <button class="btn btn-default">
-                  <span class="icon icon-home icon-text"></span>
-                  Filters
-                </button>
-            
-                <button class="btn btn-default btn-dropdown pull-right">
-                  <span class="icon icon-megaphone"></span>
-                </button>
+        <div class="toolbar-actions"></div>
+      </header>
 
-                <div class="pull-center" style="margin-left: auto;">
-                  <label for="dateFrom">Du:</label>
-                  <input  type="date" class="form-control form-control-sm " id="dateFrom" 
-                  style="width: 150px; height: 15px; margin-right: 10px;">
-                  <label for="dateFrom">Au:</label>
-                  <input  type="date" class="form-control form-control-sm " id="dateFrom" 
-                  style="width: 150px; height: 15px; margin-right: 10px;">
-                  <button class="btn btn-default btn-sm" type="">Chercher</button>
-                </div>              
-
-            </div>
-        </header>
-
+      <div class="window-content">
         <div class="window-content">
-            <div class="window-content">
-                <div class="pane-group">
-
-                  <div class="pane-sm sidebar">
-                      <nav class="nav-group">
-                          <h5 class="nav-group-title">Favorites</h5>
-                          <a class="nav-group-item active">
-                            <span class="icon icon-home"></span>
-                            connors
-                          </a>
-                          <span class="nav-group-item">
-                            <span class="icon icon-download"></span>
-                            Downloads
-                          </span>
-                          <span class="nav-group-item">
-                            <span class="icon icon-folder"></span>
-                            Documents
-                          </span>
-                          <span class="nav-group-item">
-                            <span class="icon icon-signal"></span>
-                            AirPlay
-                          </span>
-                          <span class="nav-group-item">
-                            <span class="icon icon-print"></span>
-                            Applications
-                          </span>
-                          <span class="nav-group-item">
-                            <span class="icon icon-cloud"></span>
-                            Desktop
-                          </span>
-
-                        </nav>
+          <div class="pane-group">
+            <div class="pane-sm sidebar">
+              <nav class="nav-group">
+                <h5 class="nav-group-title text-center">
+                  <strong>Filtres</strong>
+                </h5>
+                <div
+                  style="padding: 5px; margin-top: 50px; text-align: center;"
+                >
+                  <div class="form-group">
+                    <label for="prod_name"> A partir de ... </label>
+                    <input
+                      type="date"
+                      value=""
+                      class="form-control form-control-sm"
+                      name="from"
+                      id="from"
+                      required
+                    />
                   </div>
-
-                  <div class="pane">
-                    
+                  <div class="form-group">
+                    <label for="prod_pa">Jusqu'à ...</label>
+                    <input
+                      type="date"
+                      value=""
+                      class="form-control form-control-sm"
+                      id="to"
+                      name="to"
+                      required
+                    />
                   </div>
-
+                  <button
+                    class="btn btn-large btn-primary"
+                    id="btnSearchByDate"
+                  >
+                    Rechercher
+                  </button>
                 </div>
+              </nav>
             </div>
-        </div>
 
-        <footer class="toolbar toolbar-footer">
-            <h1 class="title">Footer</h1>
-        </footer>
+            <div class="pane">
+              <table class="table-striped">
+                <thead>
+                  <tr align="center">
+                    <th>Designation</th>
+                    <th>Quantité</th>
+                    <th>P. Unitaire</th>
+                    <th>P. Total</th>
+                    <th>Date</th>
+                    <th>Heure</th>
+                  </tr>
+                </thead>
+                <tbody id="table_body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="toolbar toolbar-footer">
+        <h1 class="title">Footer</h1>
+      </footer>
     </div>
 
-     <!-- Electron Javascript -->
-     <script src="../public/photon/template-app/app.js" charset="utf-8"></script>
+    <!-- Electron Javascript -->
+    <script>
+      window.$ = require("jquery");
+      require("../public/app/js/salesWindow.js");
+    </script>
   </body>
 </html>
